@@ -10,7 +10,7 @@
 
 ; 10xxxxxx
 
-. SER_CR = 0x80 ; Write
+.SER_CR = 0x80 ; Write
 ; 7 - CR7 Receive Interrupt Enable
 ; 6 - CR6 +-- Transmitter Control Bits
 ; 5 - CR5 +
@@ -20,7 +20,7 @@
 ; 1 - CR1     +-0- Counter divide (11 = master reset)
 ; 0 - CR0     +
 
-. SER_SR = 0x80 ; Read
+.SER_SR = 0x80 ; Read
 ;  7 - IRQ  State of IRQ output (1 if interrupt is triggered). Clear by reading RX or writing TX.
 ;  6 - PE   Parity Error flag
 ;  5 - OVRN Receiver Overrun error flag
@@ -30,5 +30,5 @@
 ;  1 - TDRE Transmit Data Register Empty
 ;  0 - RDFR Receive Data Register Full
 
-. SER_TX = 0x81 ; Write
-. SER_RX = 0x81 ; Read
+.SER_TX = 0x81 ; Write
+.SER_RX = 0x81 ; Read
