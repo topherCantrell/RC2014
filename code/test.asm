@@ -4,34 +4,39 @@
 ; Start of ROM
 0x0000:
 
-    DI             ; They should start off disabled, but just in case
+    LD   SP,0xC000 ; Middle of RAM
+
     LD   A,0x03    ; 0_00_000_11: Master reset ...
     OUT  SER_CR,A  ; ... the serial chip
 
-    LD   B,0       ; Pause
-P1:
-    DJNZ P1
+    CALL Delay
 
     LD   A,0x16    ; 0_00_101_10: 8N1 + DivideBy64 (115200)
     OUT  SER_CR,A  ; Configure the serial chip
 
-    LD   B,0       ; Pause
-P2:
-    DJNZ P2
+    CALL Delay
 
 Loop:
     LD   A,0x32    ; Send ...
     OUT  SER_TX,A  ; ... '2'
 
-    LD   B,0       ; Pause
-P3:
-    DJNZ P3
+    CALL Delay
 
     LD   A,66      ; Send ...
     OUT  SER_TX,A  ; ... 'B'
 
-    LD   B,0       ; Pause
-P4:
-    DJNZ P4
+    CALL Delay
 
     JR   Loop      ; Keep sending over and over
+
+; 1 / 7,372,800 = 1.3566e-7 * 13 * 256 = 4.5e-4 seconds
+; 4.5e-4 * 2048 = Almost 1 second
+Delay:
+    LD   DE,2048
+Inner:
+    DJNZ Inner     ; .0045ms spin
+    DEC  DE        ; Do ...
+    LD   A,D       ; ... outer ...
+    OR   E         ; ... count ...
+    JP   NZ,Inner  ; ... loop
+    RET
