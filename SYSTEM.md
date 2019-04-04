@@ -26,9 +26,8 @@ These images are snagged from the official RC2014 site. I gathered them here for
 
 ROM is selected when upper 3 address pins of Z80 are 0's: 0000 - 1FFF
 
-The RAM selects when upper pin is 1. It would have been better to select ROM when upper pin is 0
-thus giving 32K ROM. All the I/O devices are mapped to ports. Other types of memory devices
-that could appear here? Maybe screen memory?
+The RAM selects when upper pin is 1. The ROM could consume the entire space,
+but having banks allows the user to select multiple boot images.
 
 ![](docs/rom.jpg)
 
