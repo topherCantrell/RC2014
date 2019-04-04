@@ -47,7 +47,8 @@ mapped to A0.
 Chip is selected when A7,A6 = 10: 0080 - 00B0. Even address have RS=0 = Control/Status. Odd
 addresses have RS=1 = Tx/Rx.
 
-The Z80 clock is 7,372,800Hz. Divide that by 64 ... perfect 115200 for the serial.
+The Z80 clock is 7,372,800Hz. Divide that by 64 ... perfect 115200 for the serial. Be sure
+to set the divide-by-64 bits in the 6850.
 
 ![](docs/serial.jpg)
 

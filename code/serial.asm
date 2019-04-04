@@ -12,13 +12,13 @@
 
 .SER_CR = 0x80 ; Write
 ; 7 - CR7 Receive Interrupt Enable
-; 6 - CR6 +-- Transmitter Control Bits
-; 5 - CR5 +
-; 4 - CR4   +
-; 3 - CR3   +-- Word select (101 = 8bits, no parity, 1stop)
-; 2 - CR2   +
-; 1 - CR1     +-0- Counter divide (11 = master reset)
-; 0 - CR0     +
+; 6 - CR6   +-- Transmitter Control Bits
+; 5 - CR5   +   00=RTSlow_TXIoff, 01=RTSlow_TXIon, 10=RTShigh_TXIoff, 11=RTSlow_TXIoff_BRK
+; 4 - CR4     +
+; 3 - CR3     +-- Word select : 000=7E2, 001=7O2, 010=7E1, 011=7O1
+; 2 - CR2     +                 100=8N2, 101=8N1, 110=8E1, 110=8O1
+; 1 - CR1       +-- Counter divide
+; 0 - CR0       +   00=By1, 01=By16, 10=By64, 11=MasterReset
 
 .SER_SR = 0x80 ; Read
 ;  7 - IRQ  State of IRQ output (1 if interrupt is triggered). Clear by reading RX or writing TX.
