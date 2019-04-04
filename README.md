@@ -6,7 +6,7 @@ https://www.tindie.com/products/Semachthemonkey/rc2014-classic-homebrew-z80-comp
 
 http://rc2014.co.uk/wp-content/uploads/2016/07/Full-Monty-Assembly-Guide.pdf
 
-The board Garry bought:
+The board Gary bought:
 
 http://cpuville.com/Kits/Single-board-instructions.pdf
 
