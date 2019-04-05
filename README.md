@@ -10,6 +10,10 @@ The board Gary bought:
 
 http://cpuville.com/Kits/Single-board-instructions.pdf
 
+An existing AY38910 board:
+
+https://github.com/electrified/rc2014-ym2149/blob/master/rc2014-ym2149-schematic.pdf
+
 # My Own Tools
 
 My goal is to use only my own software tools: assembler and Z80 code. I have a COTs EEPROM programmer I'll use.
