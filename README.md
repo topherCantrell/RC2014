@@ -17,3 +17,7 @@ My goal is to use only my own software tools: assembler and Z80 code. I have a C
 ## Serial I/O
 
 Step 1: Get the basic 6850 code to send/receive serial.
+
+![](art/built.jpg)
+
+![](art/running.jpg)
