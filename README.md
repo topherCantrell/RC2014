@@ -25,3 +25,10 @@ Step 1: Get the basic 6850 code to send/receive serial.
 ![](art/built.jpg)
 
 ![](art/running.jpg)
+
+## IMPORTANT
+
+The Z80 requires you to press reset after powerup. Some boards have circuitry to reset after power on. The RC2014
+does not.
+
+PRESS THE RESET BUTTON TO RUN CODE
