@@ -38,10 +38,11 @@ getChar_wait:
 sendChar:
 ; Wait for buffer to clear.
 ; Send character in A
-        LD        B,A
+        LD        B,A             ; We need A for I/O
 sendChar_wait:
         IN        A,(SER_CR)      ; Buffer is ready ...
         AND       SER_SR_TDRE     ; ... for new data?
         JP        Z,sendChar_wait ; 0=No ... wait for ready
+        LD        A,B             ; Back to A for I/O
         OUT       (SER_TX),A      ; Write the data
         RET

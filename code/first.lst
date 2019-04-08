@@ -1,0 +1,53 @@
+#### Labels
+d1               = 0x0006
+d1a              = 0x0012
+d2               = 0x0008
+d2a              = 0x0014
+d3               = 0x000A
+d3a              = 0x0016
+d4               = 0x000C
+d4a              = 0x0018
+stop             = 0x001E
+
+#### Defines
+_CPU             = Z80
+
+                  ; Very first test. Make sure we can configure the serial chip
+                  ; and spew output
+                  
+                  ._CPU = Z80
+                  
+                  0x0000:
+                  
+0000: 3E 03            LD   A,3       ; 0_00_000_11: Master reset ...
+0002: D3 80            OUT  (128),A   ; ... the serial chip
+                  
+0004: 06 00            LD   B,0
+                  d1:
+0006: 10 FE            DJNZ d1
+                  d2:
+0008: 10 FE            DJNZ d2
+                  d3:
+000A: 10 FE            DJNZ d3
+                  d4:
+000C: 10 FE            DJNZ d4
+                  
+000E: 3E 16            LD   A,0x16    ; 22 0_00_101_10: 8N1 + DivideBy64 (115200)
+0010: D3 80            OUT  (128),A  ; Configure the serial chip
+                  
+                  d1a:
+0012: 10 FE            DJNZ d1a
+                  d2a:
+0014: 10 FE            DJNZ d2a
+                  d3a:
+0016: 10 FE            DJNZ d3a
+                  d4a:
+0018: 10 FE            DJNZ d4a
+                  
+001A: 3E 32            LD   A,50     ; Send ...
+001C: D3 81            OUT  (129),A  ; ... '2'
+                  
+                  stop:
+001E: 3A 00 20         LD  A,(8192)  ; Strobe the A13 address line (use a scope to time the DJNZ)
+0021: 10 FB            DJNZ stop
+0023: C3 1E 00         JP   stop

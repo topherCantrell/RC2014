@@ -143,10 +143,11 @@ _CPU             = Z80
                   sendChar:
                   ; Wait for buffer to clear.
                   ; Send character in A
-0026: 47               LD        B,A
+0026: 47               LD        B,A             ; We need A for I/O
                   sendChar_wait:
 0027: DB 80            IN        A,(SER_CR)      ; Buffer is ready ...
 0029: E6 02            AND       SER_SR_TDRE     ; ... for new data?
 002B: CA 27 00         JP        Z,sendChar_wait ; 0=No ... wait for ready
-002E: D3 81            OUT       (SER_TX),A      ; Write the data
-0030: C9               RET
+002E: 78               LD        A,B             ; Back to A for I/O
+002F: D3 81            OUT       (SER_TX),A      ; Write the data
+0031: C9               RET

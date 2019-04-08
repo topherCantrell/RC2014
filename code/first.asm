@@ -1,7 +1,8 @@
+; Very first test. Make sure we can configure the serial chip
+; and spew output
 
 ._CPU = Z80
 
-; Start of ROM
 0x0000:
 
     LD   A,3       ; 0_00_000_11: Master reset ...
@@ -33,6 +34,6 @@ d4a:
     OUT  (129),A  ; ... '2'
 
 stop:
-    LD  A,(8192)  ; Strobe the A13 address line
+    LD  A,(8192)  ; Strobe the A13 address line (use a scope to time the DJNZ)
     DJNZ stop
     JP   stop
