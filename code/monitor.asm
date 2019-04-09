@@ -1,10 +1,16 @@
 ; -------------------------------------------------------------
 ; > Read 10 4        - Read memory starting address 10 (read 4 bytes ... default is 1)
 ; 0010: 12 5B 80 02
+
 ; > Write 10 8 ...   - Write memory starting address 10. Write as many bytes as given
+
 ; > In 00            - Read port 0
+; 00: 20
+
 ; > Out 00 20        - Write to port 0
+
 ; > Execute 10       - Jump to address 10
+
 ; > Load             - Start binary loader
 
 ; > Blahblah
