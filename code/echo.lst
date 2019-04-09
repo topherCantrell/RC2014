@@ -1,12 +1,12 @@
 #### Labels
-getChar          = 0x001D
-getChar_wait     = 0x001D
-initSerial       = 0x000E
-initWait1        = 0x0014
-initWait2        = 0x001A
-mainLoop         = 0x0003
-sendChar         = 0x0026
-sendChar_wait    = 0x0027
+getChar          = 0x8020
+getChar_wait     = 0x8020
+initSerial       = 0x8011
+initWait1        = 0x8017
+initWait2        = 0x801D
+mainLoop         = 0x8006
+sendChar         = 0x8029
+sendChar_wait    = 0x802A
 
 #### Defines
 SER_CR           = 0x0080
@@ -110,46 +110,49 @@ _CPU             = Z80
                   ; Simple echo program. Read a character and write back
                   ; the character+1.
                   
-                  0x0000:
-0000: CD 0E 00         CALL      initSerial
+                  ; 0x0000:  ; Start of ROM
+                  0x8000:    ; Start of RAM
+                  
+8000: 31 00 00         LD        SP,0        ; Backs up to FFFE,FFFF
+8003: CD 11 80         CALL      initSerial  ; Initialize the serial
                   mainLoop:
-0003: CD 1D 00         CALL      getChar
-0006: C6 01            ADD       1
-0008: CD 26 00         CALL      sendChar
-000B: C3 03 00         JP        mainLoop
+8006: CD 20 80         CALL      getChar     ; Read a character
+8009: C6 01            ADD       1           ; Add one (proof we did something)
+800B: CD 29 80         CALL      sendChar    ; Echo back
+800E: C3 06 80         JP        mainLoop    ; Forever
                   
                   ; Needs serial.asm
                   
                   initSerial:
-000E: 3E 03            LD        A,SER_CR_RESET               ; Master reset ...
-0010: D3 80            OUT       (SER_CR),A                   ; ... the 6850
-0012: 06 00            LD        B,0                          ; (Delay may not be needed)
+8011: 3E 03            LD        A,SER_CR_RESET               ; Master reset ...
+8013: D3 80            OUT       (SER_CR),A                   ; ... the 6850
+8015: 06 00            LD        B,0                          ; (Delay may not be needed)
                   initWait1:
-0014: 10 FE            DJNZ      initWait1                    ; Short delay (may not be needed)
-0016: 3E 16            LD        A,SER_CR_BY_64 | SER_CR_8N1  ; 8N1 at 115200
-0018: D3 80            OUT       (SER_CR),A                   ; Set the serial protocol
+8017: 10 FE            DJNZ      initWait1                    ; Short delay (may not be needed)
+8019: 3E 16            LD        A,SER_CR_BY_64 | SER_CR_8N1  ; 8N1 at 115200
+801B: D3 80            OUT       (SER_CR),A                   ; Set the serial protocol
                   initWait2:
-001A: 10 FE            DJNZ      initWait2                    ; Short delay (may not be needed)
-001C: C9               RET
+801D: 10 FE            DJNZ      initWait2                    ; Short delay (may not be needed)
+801F: C9               RET
                   
                   getChar:
                   ; Wait for a character from the input.
                   ; Return it in A
                   getChar_wait:
-001D: DB 80            IN        A,(SER_CR)      ; Data ready ...
-001F: E6 01            AND       SER_SR_RDFR     ; ... to be read?
-0021: 28 FA            JR        Z,getChar_wait  ; 0=No ... wait for data
-0023: DB 81            IN        A,(SER_RX)      ; Read the data
-0025: C9               RET
+8020: DB 80            IN        A,(SER_CR)      ; Data ready ...
+8022: E6 01            AND       SER_SR_RDFR     ; ... to be read?
+8024: 28 FA            JR        Z,getChar_wait  ; 0=No ... wait for data
+8026: DB 81            IN        A,(SER_RX)      ; Read the data
+8028: C9               RET
                   
                   sendChar:
                   ; Wait for buffer to clear.
                   ; Send character in A
-0026: 47               LD        B,A             ; We need A for I/O
+8029: 47               LD        B,A             ; We need A for I/O
                   sendChar_wait:
-0027: DB 80            IN        A,(SER_CR)      ; Buffer is ready ...
-0029: E6 02            AND       SER_SR_TDRE     ; ... for new data?
-002B: CA 27 00         JP        Z,sendChar_wait ; 0=No ... wait for ready
-002E: 78               LD        A,B             ; Back to A for I/O
-002F: D3 81            OUT       (SER_TX),A      ; Write the data
-0031: C9               RET
+802A: DB 80            IN        A,(SER_CR)      ; Buffer is ready ...
+802C: E6 02            AND       SER_SR_TDRE     ; ... for new data?
+802E: CA 2A 80         JP        Z,sendChar_wait ; 0=No ... wait for ready
+8031: 78               LD        A,B             ; Back to A for I/O
+8032: D3 81            OUT       (SER_TX),A      ; Write the data
+8034: C9               RET
