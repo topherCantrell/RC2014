@@ -37,6 +37,11 @@
 
 main_loop:
 
+  LD    HL,prompt  ; Print ...
+  CALL  printStr   ; ... the prompt
+
+  CALL  read_line  ; Get user input line
+
   ; Read a line (with prompt)
   ; next token
   ; if none ... back to main_loop
@@ -45,6 +50,11 @@ main_loop:
   ; or print '??\n' and back to main_loop
 
   JP  main_loop
+
+prompt:
+. 0x0A,0x3E,0x20,0 ; "LF> "
+error:
+. 0x0A,0x3F,0x3F,0 ; "LF??"
 
 do_read:
   RET

@@ -33,3 +33,12 @@ sendChar_wait:
         LD        A,B             ; Back to A for I/O
         OUT       (SER_TX),A      ; Write the data
         RET
+
+sendStr:
+; Send a string of characters pointed to by HL
+; (null terminated)
+        LD        A,(HL)          ; Next character
+        INC       HL              ; Bump pointer
+        JP        Z,sendStr_out   ; 0 means We are done
+        CALL      sendChar        ; Write the character
+        JP        sendStr         ; Keep printing
