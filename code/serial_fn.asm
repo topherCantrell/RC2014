@@ -42,3 +42,5 @@ sendStr:
         JP        Z,sendStr_out   ; 0 means We are done
         CALL      sendChar        ; Write the character
         JP        sendStr         ; Keep printing
+sendStr_out:
+        RET

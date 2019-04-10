@@ -1,0 +1,335 @@
+#### Labels
+#0x0000          = 0x0000
+do_execute       = 0x801B
+do_help          = 0x801C
+do_in            = 0x8019
+do_load          = 0x801D
+do_out           = 0x801A
+do_read          = 0x8017
+do_write         = 0x8018
+error            = 0x8013
+getChar          = 0x8094
+getChar_wait     = 0x8094
+initSerial       = 0x8085
+initWait1        = 0x808B
+initWait2        = 0x8091
+main_loop        = 0x8003
+next_token       = 0x8035
+next_token_out   = 0x804C
+next_token_skip  = 0x803F
+parse_hex        = 0x804F
+print_hex        = 0x8057
+print_hex_digit  = 0x8066
+print_hex_digit_num = 0x8071
+prompt           = 0x800F
+read_line        = 0x801E
+read_line_all    = 0x8021
+read_line_out    = 0x802E
+sendChar         = 0x809D
+sendChar_wait    = 0x809E
+sendStr          = 0x80A9
+sendStr_out      = 0x80B4
+to_upper         = 0x8077
+to_upper_do      = 0x8082
+to_upper_out     = 0x8081
+
+#### Defines
+SER_CR           = 0x0080
+SER_CR_7E1       = 0x0008
+SER_CR_7E2       = 0x0000
+SER_CR_7O1       = 0x000C
+SER_CR_7O2       = 0x0004
+SER_CR_8E1       = 0x0018
+SER_CR_8N1       = 0x0014
+SER_CR_8N2       = 0x0010
+SER_CR_8O2       = 0x001C
+SER_CR_BY_1      = 0x0000
+SER_CR_BY_16     = 0x0001
+SER_CR_BY_64     = 0x0002
+SER_CR_RESET     = 0x0003
+SER_CR_RTShigh_TXIoff = 0x0002
+SER_CR_RTSlow_TXIoff = 0x0000
+SER_CR_RTSlow_TXIoff_BRK = 0x0003
+SER_CR_RTSlow_TXIon = 0x0001
+SER_CR_RXI_Enable = 0x0080
+SER_RX           = 0x0081
+SER_SR           = 0x0080
+SER_SR_CTS       = 0x0008
+SER_SR_DCD       = 0x0004
+SER_SR_FE        = 0x0010
+SER_SR_IRQ       = 0x0080
+SER_SR_OVRN      = 0x0020
+SER_SR_PE        = 0x0040
+SER_SR_RDFR      = 0x0001
+SER_SR_TDRE      = 0x0002
+SER_TX           = 0x0081
+_CPU             = Z80
+input_buffer     = 0x9000
+
+                  ; -------------------------------------------------------------
+                  ; > Read 10 4        - Read memory starting address 10 (read 4 bytes ... default is 1)
+                  ; 0010: 12 5B 80 02
+                  
+                  ; > Write 10 8 ...   - Write memory starting address 10. Write as many bytes as given
+                  
+                  ; > In 00            - Read port 0
+                  ; 00: 20
+                  
+                  ; > Out 00 20        - Write to port 0
+                  
+                  ; > Execute 10       - Jump to address 10
+                  
+                  ; > Load             - Start binary loader
+                  
+                  ; > Blahblah
+                  ; ??
+                  
+                  ; > Help
+                  
+                  ; Pressing ENTER-only restarts prompt on next line
+                  
+                  ; Load binary protocol: aaLL.... (2 byte address Big Endian, 2 byte length Big endian, data)
+                  ; Load returns to prompt.
+                  ; -------------------------------------------------------------
+                  
+                  ._CPU = Z80
+                  
+                  ; http://www.vcfed.org/forum/archive/index.php/t-52356.html
+                  
+                  ; The master reset (CR0, CR1) must be set immediately after powerup.
+                  ; CR5 and CR6 should be programmed to define the state of RTS when later master resets are given
+                  
+                  ;  CS0 -> M1
+                  ;  CS1 -> A7
+                  ; -CS2 -> A6
+                  ;  RS  -> A0
+                  
+                  ; 10xxxxxx
+                  
+                  .SER_CR = 0x80 ; Write
+                  ; 7 - CR7 Receive Interrupt Enable
+                  ; 6 - CR6   +-- Transmitter Control Bits
+                  ; 5 - CR5   +   00=RTSlow_TXIoff, 01=RTSlow_TXIon, 10=RTShigh_TXIoff, 11=RTSlow_TXIoff_BRK
+                  ; 4 - CR4     +
+                  ; 3 - CR3     +-- Word select : 000=7E2, 001=7O2, 010=7E1, 011=7O1
+                  ; 2 - CR2     +                 100=8N2, 101=8N1, 110=8E1, 111=8O1
+                  ; 1 - CR1       +-- Counter divide
+                  ; 0 - CR0       +   00=By1, 01=By16, 10=By64, 11=MasterReset
+                  .SER_CR_BY_1  = 0b0_00_000_00
+                  .SER_CR_BY_16 = 0b0_00_000_01
+                  .SER_CR_BY_64 = 0b0_00_000_10 ; Use this for RC2014 board
+                  .SER_CR_RESET = 0b0_00_000_11
+                  ;
+                  .SER_CR_7E2 = 0b0_00_000_00
+                  .SER_CR_7O2 = 0b0_00_001_00
+                  .SER_CR_7E1 = 0b0_00_010_00
+                  .SER_CR_7O1 = 0b0_00_011_00
+                  .SER_CR_8N2 = 0b0_00_100_00
+                  .SER_CR_8N1 = 0b0_00_101_00
+                  .SER_CR_8E1 = 0b0_00_110_00
+                  .SER_CR_8O2 = 0b0_00_111_00
+                  ;
+                  .SER_CR_RTSlow_TXIoff     = 0b0_00_000_00
+                  .SER_CR_RTSlow_TXIon      = 0b0_00_000_01
+                  .SER_CR_RTShigh_TXIoff    = 0b0_00_000_10
+                  .SER_CR_RTSlow_TXIoff_BRK = 0b0_00_000_11
+                  ;
+                  .SER_CR_RXI_Enable = 0b1_00_000_00
+                  
+                  .SER_SR = 0x80 ; Read
+                  ;  7 - IRQ  State of IRQ output (1 if interrupt is triggered). Clear by reading RX or writing TX.
+                  ;  6 - PE   Parity Error flag
+                  ;  5 - OVRN Receiver Overrun error flag
+                  ;  4 - FE   Framing Error
+                  ;  3 - CTS  Clear to Send
+                  ;  2 - DCD  Data Carrier Detect
+                  ;  1 - TDRE Transmit Data Register Empty
+                  ;  0 - RDFR Receive Data Register Full
+                  .SER_SR_RDFR = 0b00000001
+                  .SER_SR_TDRE = 0b00000010
+                  .SER_SR_DCD  = 0b00000100
+                  .SER_SR_CTS  = 0b00001000
+                  .SER_SR_FE   = 0b00010000
+                  .SER_SR_OVRN = 0b00100000
+                  .SER_SR_PE   = 0b01000000
+                  .SER_SR_IRQ  = 0b10000000
+                  
+                  ; TX/RX data
+                  
+                  .SER_TX = 0x81 ; Write
+                  .SER_RX = 0x81 ; Read
+                  
+                  .input_buffer = 0x9000 ; 0x9100
+                  
+                  #0x0000: ; ROM
+                  0x8000:  ; RAM
+                  
+8000: 31 00 00         LD  SP,0  ; First on stack at FFFE,FFFF
+                  
+                  main_loop:
+                  
+8003: 21 0F 80         LD    HL,prompt  ; Print ...
+8006: CD A9 80         CALL  sendStr    ; ... the prompt
+                  
+8009: CD 1E 80         CALL  read_line  ; Get user input line
+                  
+                  ; Read a line (with prompt)
+                  ; next token
+                  ; if none ... back to main_loop
+                  ; parse first character and next_token
+                  ; call appropriate function
+                  ; or print '??\n' and back to main_loop
+                  
+800C: C3 03 80         JP  main_loop
+                  
+                  prompt:
+800F: 0A 3E 20 00      . 0x0A,0x3E,0x20,0 ; "LF> "
+                  error:
+8013: 0A 3F 3F 00      . 0x0A,0x3F,0x3F,0 ; "LF??"
+                  
+                  do_read:
+8017: C9               RET
+                  do_write:
+8018: C9               RET
+                  do_in:
+8019: C9               RET
+                  do_out:
+801A: C9               RET
+                  do_execute:
+801B: C9               RET
+                  do_help:
+801C: C9               RET
+                  do_load:
+801D: C9               RET
+                  
+                  read_line:
+                  ; Read a line up to a LF into the input buffer
+                  ; (no back-space processing)
+                  ; (no buffer-overflow checking)
+801E: 21 00 90         LD     HL,input_buffer  ; The start of the input buffer
+                  read_line_all:
+8021: CD 17 80         CALL   do_read          ; Get the next character
+8024: FE 0A            CP     0x0A             ; A LF?
+8026: CA 2E 80         JP     Z,read_line_out  ; Yes ... terminate the buffer and out
+8029: 77               LD     (HL),A           ; Store the ...
+802A: 23               INC    HL               ; ... character in  the buffer
+802B: C3 21 80         JP     read_line_all    ; Keep looking for LF
+                  read_line_out:
+802E: 3E 00            LD     A,0              ; Null termninate ...
+8030: 77               LD     (HL),A           ; ... the user input
+8031: 21 00 90         LD     HL,input_buffer  ; Start of the input
+8034: C9               RET
+                  
+                  next_token:
+                  ; increment HL while it isn't space
+                  ; increment HL while it is space
+8035: 7E               LD     A,(HL)            ; Current character in buffer
+8036: CA 4C 80         JP     Z,next_token_out  ; We are at the end ... out
+8039: 23               INC    HL                ; Point to next
+803A: FE 20            CP     0x20              ; Did we find a space?
+803C: C2 35 80         JP     NZ, next_token    ; No ... keep looking for space or NULL
+                  next_token_skip:
+803F: 7E               LD     A,(HL)            ; Current in buffer
+8040: CA 4C 80         JP     Z,next_token_out  ; We are at the end ... out
+8043: FE 20            CP     0x20              ; Is this a space?
+8045: C2 4C 80         JP     NZ,next_token_out ; No ... this is our spot
+8048: 23               INC    HL                ; Skip over space
+8049: C3 3F 80         JP     next_token_skip   ; Keep looking for non-space or NULL
+                  next_token_out:
+804C: FE 00            CP     0                 ; Z set if there is no token
+804E: C9               RET
+                  
+                  parse_hex:
+                  ; HL points to first digit
+                  ; Return with HL one past last
+                  ; Return value in BC
+804F: 01 00 00         LD     BC,0
+8052: 7E               LD     A,(HL)
+8053: CD 77 80         CALL   to_upper
+                  ; TODO
+8056: C9               RET
+                  
+                  print_hex:
+8057: F5               PUSH   AF                ; Hold lower digit
+8058: CB 3F            SRL    A                 ; Get ...
+805A: CB 3F            SRL    A                 ; ... upper ...
+805C: CB 3F            SRL    A                 ; ... four ...
+805E: CB 3F            SRL    A                 ; ... bits
+8060: CD 66 80         CALL   print_hex_digit   ; Print the digit
+8063: F1               POP    AF                ; Get the ...
+8064: E6 0F            AND    0x0F              ; ... lower digit
+                  ;
+                  ; CALL    print_hex_digit  ; Print the lower digit
+                  ; RET
+                  ;
+                  ; Just Fall in
+                  
+                  print_hex_digit:
+                  ; always 2 digits. call again if you need 4.
+8066: FE 0A            CP     10                     ; Less than 10?
+8068: DA 71 80         JP     C,print_hex_digit_num  ; Yes ... go add '0'
+806B: C6 37            ADD    65-10                  ; No ... add 'A' (subtract 10 first)
+806D: CD 18 80         CALL   do_write               ; Print the char
+8070: C9               RET
+                  print_hex_digit_num:
+8071: C6 30            ADD    48                     ; Now ASCII number
+8073: CD 18 80         CALL   do_write               ; Print the char
+8076: C9               RET
+                  
+                  to_upper:
+8077: FE 3D            CP     61                ; Less than 'a'?
+8079: DA 81 80         JP     C,to_upper_out    ; Yes ... leave it alone
+807C: FE 7B            CP     123               ; Less than or equal 'z'?
+807E: DA 82 80         JP     C,to_upper_do     ; Yes ... do the conversion
+                  to_upper_out:
+8081: C9               RET                      ; Leave the character alone
+                  to_upper_do:
+8082: E6 DF            AND    255-32            ; Mask off the bit
+8084: C9               RET
+                  
+                  ; Needs serial.asm
+                  
+                  initSerial:
+8085: 3E 03            LD        A,SER_CR_RESET               ; Master reset ...
+8087: D3 80            OUT       (SER_CR),A                   ; ... the 6850
+8089: 06 00            LD        B,0                          ; (Delay may not be needed)
+                  initWait1:
+808B: 10 FE            DJNZ      initWait1                    ; Short delay (may not be needed)
+808D: 3E 16            LD        A,SER_CR_BY_64 | SER_CR_8N1  ; 8N1 at 115200
+808F: D3 80            OUT       (SER_CR),A                   ; Set the serial protocol
+                  initWait2:
+8091: 10 FE            DJNZ      initWait2                    ; Short delay (may not be needed)
+8093: C9               RET
+                  
+                  getChar:
+                  ; Wait for a character from the input.
+                  ; Return it in A
+                  getChar_wait:
+8094: DB 80            IN        A,(SER_CR)      ; Data ready ...
+8096: E6 01            AND       SER_SR_RDFR     ; ... to be read?
+8098: 28 FA            JR        Z,getChar_wait  ; 0=No ... wait for data
+809A: DB 81            IN        A,(SER_RX)      ; Read the data
+809C: C9               RET
+                  
+                  sendChar:
+                  ; Wait for buffer to clear.
+                  ; Send character in A
+809D: 47               LD        B,A             ; We need A for I/O
+                  sendChar_wait:
+809E: DB 80            IN        A,(SER_CR)      ; Buffer is ready ...
+80A0: E6 02            AND       SER_SR_TDRE     ; ... for new data?
+80A2: CA 9E 80         JP        Z,sendChar_wait ; 0=No ... wait for ready
+80A5: 78               LD        A,B             ; Back to A for I/O
+80A6: D3 81            OUT       (SER_TX),A      ; Write the data
+80A8: C9               RET
+                  
+                  sendStr:
+                  ; Send a string of characters pointed to by HL
+                  ; (null terminated)
+80A9: 7E               LD        A,(HL)          ; Next character
+80AA: 23               INC       HL              ; Bump pointer
+80AB: CA B4 80         JP        Z,sendStr_out   ; 0 means We are done
+80AE: CD 9D 80         CALL      sendChar        ; Write the character
+80B1: C3 A9 80         JP        sendStr         ; Keep printing
+                  sendStr_out:
+80B4: C9               RET
