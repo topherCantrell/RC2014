@@ -6,18 +6,18 @@ fn_read          = 0x8040
 fn_read_port     = 0x8028
 fn_write         = 0x805E
 fn_write_port    = 0x8034
-getChar          = 0x8096
-getChar_wait     = 0x8096
-initSerial       = 0x8087
-initWait1        = 0x808D
-initWait2        = 0x8093
+getChar          = 0x8099
+getChar_wait     = 0x8099
+initSerial       = 0x808A
+initWait1        = 0x8090
+initWait2        = 0x8096
 main_loop        = 0x8003
 ping_string      = 0x8085
 read_loop        = 0x8050
-sendChar         = 0x809F
-sendChar_wait    = 0x80A0
-sendStr          = 0x80AB
-sendStr_out      = 0x80B6
+sendChar         = 0x80A2
+sendChar_wait    = 0x80A3
+sendStr          = 0x80AE
+sendStr_out      = 0x80B9
 write_loop       = 0x806E
 
 #### Defines
@@ -140,7 +140,7 @@ input_buffer     = 0x9000
                   
                   main_loop:
                   
-8003: CD 96 80         CALL  getChar
+8003: CD 99 80         CALL  getChar
                   
 8006: FE 01            CP    1
 8008: CA 40 80         JP    Z,fn_read
@@ -155,35 +155,35 @@ input_buffer     = 0x9000
                   
                   fn_ping:
 801F: 21 85 80         LD    HL,ping_string
-8022: CD AB 80         CALL  sendStr
+8022: CD AE 80         CALL  sendStr
 8025: C3 03 80         JP    main_loop
                   
                   fn_read_port:
-8028: CD 96 80         CALL      getChar       ; Port
+8028: CD 99 80         CALL      getChar       ; Port
 802B: 4F               LD        C,A
 802C: ED 78            IN        A,(C)
-802E: CD 9F 80         CALL      sendChar
+802E: CD A2 80         CALL      sendChar
 8031: C3 03 80         JP        main_loop
                   
                   fn_write_port:
-8034: CD 96 80         CALL      getChar       ; Port
+8034: CD 99 80         CALL      getChar       ; Port
 8037: 4F               LD        C,A
-8038: CD 96 80         CALL      getChar
+8038: CD 99 80         CALL      getChar
 803B: ED 79            OUT       (C),A
 803D: C3 03 80         JP        main_loop
                   
                   fn_read:
-8040: CD 96 80         CALL      getChar       ; Destination
+8040: CD 99 80         CALL      getChar       ; Destination
 8043: 67               LD        H,A
-8044: CD 96 80         CALL      getChar
+8044: CD 99 80         CALL      getChar
 8047: 6F               LD        L,A
-8048: CD 96 80         CALL      getChar       ; Length
+8048: CD 99 80         CALL      getChar       ; Length
 804B: 57               LD        D,A
-804C: CD 96 80         CALL      getChar
+804C: CD 99 80         CALL      getChar
 804F: 5F               LD        E,A
                   read_loop:
 8050: 7E               LD        A,(HL)        ; Read from memory
-8051: CD 9F 80         CALL      sendChar      ; Write to serial
+8051: CD A2 80         CALL      sendChar      ; Write to serial
 8054: 23               INC       HL            ; Bump the destination pointer
 8055: 1B               DEC       DE            ; Decrement the length
 8056: 7A               LD        A,D           ; All ...
@@ -192,16 +192,16 @@ input_buffer     = 0x9000
 805B: C3 03 80         JP        main_loop
                   
                   fn_write:
-805E: CD 96 80         CALL      getChar       ; Destination
+805E: CD 99 80         CALL      getChar       ; Destination
 8061: 67               LD        H,A
-8062: CD 96 80         CALL      getChar
+8062: CD 99 80         CALL      getChar
 8065: 6F               LD        L,A
-8066: CD 96 80         CALL      getChar       ; Length
+8066: CD 99 80         CALL      getChar       ; Length
 8069: 57               LD        D,A
-806A: CD 96 80         CALL      getChar
+806A: CD 99 80         CALL      getChar
 806D: 5F               LD        E,A
                   write_loop:
-806E: CD 96 80         CALL      getChar       ; Get byte
+806E: CD 99 80         CALL      getChar       ; Get byte
 8071: 77               LD        (HL),A        ; Store it to RAM
 8072: 23               INC       HL            ; Bump the destination pointer
 8073: 1B               DEC       DE            ; Decrement the length
@@ -211,10 +211,58 @@ input_buffer     = 0x9000
 8079: C3 03 80         JP        main_loop
                   
                   fn_execute:
-807C: CD 96 80         CALL      getChar       ; Destination
+807C: CD 99 80         CALL      getChar       ; Destination
 807F: 67               LD        H,A
-8080: CD 96 80         CALL      getChar
+8080: CD 99 80         CALL      getChar
 8083: 6F               LD        L,A
-8084: E9               JP        (HL)
+8084: E9               JP        (HL)          ; Jump to the destination
                   
                   ping_string:
+8085: 48 65 72 65 00   . 0x48,0x65,0x72,0x65,0
+                  
+                  ; Needs serial.asm
+                  
+                  initSerial:
+808A: 3E 03            LD        A,SER_CR_RESET               ; Master reset ...
+808C: D3 80            OUT       (SER_CR),A                   ; ... the 6850
+808E: 06 00            LD        B,0                          ; (Delay may not be needed)
+                  initWait1:
+8090: 10 FE            DJNZ      initWait1                    ; Short delay (may not be needed)
+8092: 3E 16            LD        A,SER_CR_BY_64 | SER_CR_8N1  ; 8N1 at 115200
+8094: D3 80            OUT       (SER_CR),A                   ; Set the serial protocol
+                  initWait2:
+8096: 10 FE            DJNZ      initWait2                    ; Short delay (may not be needed)
+8098: C9               RET
+                  
+                  getChar:
+                  ; Wait for a character from the input.
+                  ; Return it in A
+                  getChar_wait:
+8099: DB 80            IN        A,(SER_CR)      ; Data ready ...
+809B: E6 01            AND       SER_SR_RDFR     ; ... to be read?
+809D: 28 FA            JR        Z,getChar_wait  ; 0=No ... wait for data
+809F: DB 81            IN        A,(SER_RX)      ; Read the data
+80A1: C9               RET
+                  
+                  sendChar:
+                  ; Wait for buffer to clear.
+                  ; Send character in A
+80A2: 47               LD        B,A             ; We need A for I/O
+                  sendChar_wait:
+80A3: DB 80            IN        A,(SER_CR)      ; Buffer is ready ...
+80A5: E6 02            AND       SER_SR_TDRE     ; ... for new data?
+80A7: CA A3 80         JP        Z,sendChar_wait ; 0=No ... wait for ready
+80AA: 78               LD        A,B             ; Back to A for I/O
+80AB: D3 81            OUT       (SER_TX),A      ; Write the data
+80AD: C9               RET
+                  
+                  sendStr:
+                  ; Send a string of characters pointed to by HL
+                  ; (null terminated)
+80AE: 7E               LD        A,(HL)          ; Next character
+80AF: 23               INC       HL              ; Bump pointer
+80B0: CA B9 80         JP        Z,sendStr_out   ; 0 means We are done
+80B3: CD A2 80         CALL      sendChar        ; Write the character
+80B6: C3 AE 80         JP        sendStr         ; Keep printing
+                  sendStr_out:
+80B9: C9               RET

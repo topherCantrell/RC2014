@@ -97,9 +97,9 @@ fn_execute:
   LD        H,A
   CALL      getChar
   LD        L,A
-  JP        (HL)
+  JP        (HL)          ; Jump to the destination
 
 ping_string:
-. "Here",0
+. 0x48,0x65,0x72,0x65,0
 
 .include serial_fn.asm
