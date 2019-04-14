@@ -1,4 +1,10 @@
-; -------------------------------------------------------------
+; -------------------------------------------------------------------
+; This is a binary serial service to be used by a monitor
+; written in, say, python. All of the GUI functions and input
+; management are handled by the monitor program on the PC.
+;
+; All we do here is respond to requests from that program.
+;
 ; Two-byte values in MSB-first
 ;
 ; 1aaLL    - Read LL bytes beginning at aa
@@ -7,8 +13,8 @@
 ; 4pV      - Write the value V to port p
 ; 5aa      - Execute address aa
 ;
-; Anything else: responds with "Here2" (2=version)
-; -------------------------------------------------------------
+; Anything else: responds with ascii version string (null terminated)
+; -------------------------------------------------------------------
 
 ._CPU = Z80
 
@@ -43,7 +49,7 @@ fn_ping:
   LD    HL,ping_string
   CALL  sendStr
   LD    A,0
-  CALL  send_char
+  CALL  sendChar
   JP    main_loop
 
 fn_read_port:
@@ -106,6 +112,6 @@ fn_execute:
   JP        (HL)          ; Jump to the destination
 
 ping_string:
-. 0x48,0x65,0x72,0x65,50,0
+.   "V2.0", 0
 
 .include serial_fn.asm
