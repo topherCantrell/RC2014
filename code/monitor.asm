@@ -1,24 +1,24 @@
 ; -------------------------------------------------------------
-
 ; Two-byte values in MSB-first
-
-; 0        - Responds with "I am here" string
+;
 ; 1aaLL    - Read LL bytes beginning at aa
 ; 2aaLL... - Write LL byte beginning at aa
 ; 3p       - Read the port p
 ; 4pV      - Write the value V to port p
 ; 5aa      - Execute address aa
+;
+; Anything else: responds with "Here2" (2=version)
+; -------------------------------------------------------------
 
 ._CPU = Z80
 
 .include serial.asm
 
-.input_buffer = 0x9000 ; 0x9100
+0x0000: ; ROM
+#0x8000:  ; RAM
 
-#0x0000: ; ROM
-0x8000:  ; RAM
-
-  LD  SP,0  ; First on stack at FFFE,FFFF
+  LD    SP,0         ; First on stack at FFFE,FFFF
+  CALL  initSerial
 
 main_loop:
 
@@ -26,18 +26,24 @@ main_loop:
 
   CP    1
   JP    Z,fn_read
+
   CP    2
   JP    Z,fn_write
+
   CP    3
   JP    Z,fn_read_port
+
   CP    4
   JP    Z,fn_write_port
+
   CP    5
   JP    Z,fn_execute
 
 fn_ping:
   LD    HL,ping_string
   CALL  sendStr
+  LD    A,0
+  CALL  send_char
   JP    main_loop
 
 fn_read_port:
@@ -100,6 +106,6 @@ fn_execute:
   JP        (HL)          ; Jump to the destination
 
 ping_string:
-. 0x48,0x65,0x72,0x65,0
+. 0x48,0x65,0x72,0x65,50,0
 
 .include serial_fn.asm

@@ -38,8 +38,9 @@ sendStr:
 ; Send a string of characters pointed to by HL
 ; (null terminated)
         LD        A,(HL)          ; Next character
-        INC       HL              ; Bump pointer
+        CP        0
         JP        Z,sendStr_out   ; 0 means We are done
+        INC       HL              ; Bump pointer
         CALL      sendChar        ; Write the character
         JP        sendStr         ; Keep printing
 sendStr_out:
